@@ -1,0 +1,26 @@
+<div class="card">
+  <ng-container *ngIf="mfaSuccessMessage; else mfaForm">
+    <h3>Success! You have enroll in Multi Factor Authentication</h3>
+    <button (click)="goToProfile()">Go to profile</button>
+  </ng-container>
+  <ng-template #mfaForm>
+    <p class="mfa-label">Insert your MFA code</p>
+    <form
+      class="form-container"
+      #mfaForm="ngForm"
+      (ngSubmit)="handleSubmit(mfaForm)"
+    >
+      <div>
+        <input
+          type="text"
+          name="mfaCode"
+          [(ngModel)]="mfaCode"
+          placeholder="Mfa Code"
+          pattern="^[0-9]*$"
+          required
+        />
+        <button type="submit">Send Code</button>
+      </div>
+    </form>
+  </ng-template>
+</div>

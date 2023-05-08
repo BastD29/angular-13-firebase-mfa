@@ -1,0 +1,21 @@
+<div class="card">
+  <p class="mfa-label">Multi-factor authentication</p>
+  <form class="form-container" [formGroup]="form" (ngSubmit)="handleSubmit()">
+    <div class="container">
+      <input
+        type="tel"
+        name="tel"
+        formControlName="tel"
+        pattern="^\d{1,15}$"
+        required
+        placeholder="Your Phone Number"
+      />
+      <select name="country" formControlName="country">
+        <option value="US">US</option>
+        <option value="MX">MX</option>
+        <option value="FR">FR</option>
+      </select>
+    </div>
+    <input id="recaptcha" type="submit" value="Send Phone" />
+  </form>
+</div>

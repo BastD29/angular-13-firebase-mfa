@@ -16,6 +16,9 @@ import { SignUpComponent } from './components/sign-up/sign-up.component';
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
 import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
 import { AuthService } from './shared/services/auth.service';
+import { MfaSendPhoneComponent } from './components/mfa-send-phone/mfa-send-phone.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { SendVerificationCodeComponent } from './components/send-verification-code/send-verification-code.component';
 
 @NgModule({
   declarations: [
@@ -25,6 +28,8 @@ import { AuthService } from './shared/services/auth.service';
     SignUpComponent,
     ForgotPasswordComponent,
     VerifyEmailComponent,
+    MfaSendPhoneComponent,
+    SendVerificationCodeComponent,
   ],
   imports: [
     BrowserModule,
@@ -34,6 +39,8 @@ import { AuthService } from './shared/services/auth.service';
     AngularFirestoreModule,
     AngularFireStorageModule,
     AngularFireDatabaseModule,
+    ReactiveFormsModule,
+    FormsModule,
   ],
   providers: [AuthService],
   bootstrap: [AppComponent],

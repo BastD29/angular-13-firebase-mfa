@@ -13,6 +13,8 @@ import * as auth from 'firebase/auth';
 })
 export class AuthService {
   userData: any; // Save logged in user data
+  verificationId: string | null = null;
+
   constructor(
     public afs: AngularFirestore, // Inject Firestore service
     public afAuth: AngularFireAuth, // Inject Firebase auth service
@@ -57,7 +59,7 @@ export class AuthService {
       });
   }
 
-  // Sign in with email/password
+  // SIGN IN
   SignIn(email: string, password: string) {
     return this.afAuth
       .signInWithEmailAndPassword(email, password)
@@ -65,13 +67,81 @@ export class AuthService {
         this.SetUserData(result.user);
         this.afAuth.authState.subscribe((user) => {
           if (user) {
-            this.router.navigate(['dashboard']);
+            // this.router.navigate(['dashboard']);
+            this.router.navigate(['mfa-send-phone']);
           }
         });
       })
       .catch((error) => {
         window.alert(error.message);
       });
+  }
+
+  // MFA START
+  async StartEnrollMultiFactor(phoneNumber: string | null) {
+    const authInstance = auth.getAuth();
+    const recaptchaVerifier = new auth.RecaptchaVerifier(
+      'recaptcha',
+      { size: 'invisible' },
+      authInstance
+    );
+
+    const user = await this.afAuth.currentUser;
+
+    if (user) {
+      this.verificationId = await auth
+        .multiFactor(user)
+        .getSession()
+        .then(function (multiFactorSession) {
+          const phoneInfoOptions = {
+            phoneNumber: phoneNumber,
+            session: multiFactorSession,
+          };
+
+          const phoneAuthProvider = new auth.PhoneAuthProvider(authInstance);
+
+          return phoneAuthProvider.verifyPhoneNumber(
+            phoneInfoOptions,
+            recaptchaVerifier
+          );
+        })
+        .catch(function (error) {
+          if (error.code == 'auth/invalid-phone-number') {
+            alert(
+              `Error with phone number formatting. 
+               Phone numbers must start with +. ${error}`
+            );
+          } else {
+            alert(`Error enrolling second factor. ${error}`);
+          }
+          throw error;
+        });
+    } else {
+      console.log('no user');
+      return;
+    }
+  }
+
+  async FinishEnrollmentMultiFactor(verificationCode: string) {
+    const user = await this.afAuth.currentUser;
+
+    if (this.verificationId && user) {
+      const cred = auth.PhoneAuthProvider.credential(
+        this.verificationId,
+        verificationCode
+      );
+      const multiFactorAssertion =
+        auth.PhoneMultiFactorGenerator.assertion(cred);
+
+      await auth
+        .multiFactor(user)
+        .enroll(multiFactorAssertion, 'My cellphone number')
+        .catch(function (error) {
+          alert(`Error finishing second factor enrollment. ${error}`);
+          throw Error;
+        });
+      this.verificationId = null;
+    }
   }
 
   // Sign up with email/password
